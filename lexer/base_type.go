@@ -1,4 +1,4 @@
-package leaxer
+package lexer
 
 type TypeMatching func(ch byte) bool
 

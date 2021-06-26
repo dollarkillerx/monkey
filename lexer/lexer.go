@@ -1,4 +1,4 @@
-package leaxer
+package lexer
 
 import (
 	"github.com/dollarkillerx/monkey/token"
@@ -29,6 +29,15 @@ func (l *Lexer) readChar() {
 	l.readPosition += 1
 }
 
+// peekChar 尝试获取下一个字符但是不移位
+func (l *Lexer) peekChar() byte {
+	if l.readPosition >= len(l.input) {
+		return 0
+	} else {
+		return l.input[l.readPosition]
+	}
+}
+
 func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 
@@ -36,7 +45,12 @@ func (l *Lexer) NextToken() token.Token {
 
 	switch l.ch {
 	case '=':
-		tok = token.NewToken(token.ASSIGN, l.ch)
+		if l.peekChar() == '=' {
+			l.readChar()
+			tok = token.Token{Type: token.EQ, Literal: "=="}
+		} else {
+			tok = token.NewToken(token.ASSIGN, l.ch)
+		}
 	case ';':
 		tok = token.NewToken(token.SEMICOLON, l.ch)
 	case ',':
@@ -51,6 +65,23 @@ func (l *Lexer) NextToken() token.Token {
 		tok = token.NewToken(token.RBRACE, l.ch)
 	case '+':
 		tok = token.NewToken(token.PLUS, l.ch)
+	case '-':
+		tok = token.NewToken(token.MINUS, l.ch)
+	case '!':
+		if l.peekChar() == '=' {
+			l.readChar()
+			tok = token.Token{Type: token.NOT_EQ, Literal: "!="}
+		} else {
+			tok = token.NewToken(token.BANG, l.ch)
+		}
+	case '/':
+		tok = token.NewToken(token.SLASH, l.ch)
+	case '*':
+		tok = token.NewToken(token.ASTERISK, l.ch)
+	case '<':
+		tok = token.NewToken(token.LT, l.ch)
+	case '>':
+		tok = token.NewToken(token.GT, l.ch)
 	case 0:
 		tok = token.TokenEOF
 	default:

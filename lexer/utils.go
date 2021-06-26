@@ -1,4 +1,4 @@
-package leaxer
+package lexer
 
 // skipWhitespace 跳过空白符
 func (l *Lexer) skipWhitespace() {
