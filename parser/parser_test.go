@@ -3,10 +3,10 @@ package parser
 import (
 	"encoding/json"
 	"fmt"
+	"testing"
+
 	"github.com/dollarkillerx/monkey/ast"
 	"github.com/dollarkillerx/monkey/lexer"
-
-	"testing"
 )
 
 func TestLetStatements(t *testing.T) {
@@ -202,7 +202,7 @@ func TestParsingInfixExpressions(t *testing.T) {
 		{"5 < 5;", 5, "<", 5},
 		{"5 == 5;", 5, "==", 5},
 		{"5 != 5;", 5, "!=", 5},
-		{"5 + 5 * 3;", 5, "!=", 5},
+		//{"5 + 5 * 3;", 5, "!=", 5},
 	}
 	for _, tt := range infixTests {
 		l := lexer.New(tt.input)
@@ -233,6 +233,20 @@ func TestParsingInfixExpressions(t *testing.T) {
 		if !testIntegerLiteral(t, exp.Right, tt.rightValue) {
 			return
 		}
+	}
+}
+
+func TestParsingInfixExpressionsV2(t *testing.T) {
+	input := "6 == -1 - 2 * 3 / 6 -  9;"
+
+	l := lexer.New(input)
+	parser := New(l)
+	program := parser.ParseProgram()
+	fmt.Println(program.String())
+
+	marshal, err := json.Marshal(program)
+	if err == nil {
+		fmt.Println(string(marshal))
 	}
 }
 

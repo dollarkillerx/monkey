@@ -29,6 +29,8 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 		return nil
 	}
 
+	stmt.Value = p.parseExpression(LOWEST)
+
 	// 我们跳过表达式，直到我们 遇到一个分号为止
 	if !p.curTokenIs(token.SEMICOLON) {
 		p.nextToken()
@@ -43,6 +45,8 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 
 	p.nextToken()
 
+	stmt.ReturnValue = p.parseExpression(LOWEST)
+
 	for !p.curTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
@@ -51,6 +55,8 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 }
 
 func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
+	defer untrace(trace("parseExpressionStatement"))
+
 	stmt := &ast.ExpressionStatement{
 		Token: p.curToken,
 	}
@@ -65,6 +71,8 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 
 // parseExpression 解析表达式
 func (p *Parser) parseExpression(precedence int) ast.Expression {
+	defer untrace(trace("parseExpression"))
+
 	prefix, ex := p.prefixParseFns[p.curToken.Type]
 	if !ex {
 		p.noPrefixParseFnError(p.curToken.Type)
@@ -95,6 +103,8 @@ func (p *Parser) parseIdentifier() ast.Expression {
 
 // parseIntegerLiteral 解析int
 func (p *Parser) parseIntegerLiteral() ast.Expression {
+	defer untrace(trace("parseIntegerLiteral"))
+
 	lit := &ast.IntegerLiteral{Token: p.curToken}
 
 	value, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
@@ -115,6 +125,8 @@ func (p *Parser) noPrefixParseFnError(t token.TokenType) {
 
 // parsePrefixExpression 前置解析
 func (p *Parser) parsePrefixExpression() ast.Expression {
+	defer untrace(trace("parsePrefixExpression"))
+
 	expression := &ast.PrefixExpression{
 		Token:    p.curToken,
 		Operator: p.curToken.Literal,
@@ -129,8 +141,8 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 
 // peekPrecedence 向下获取运算符优先级
 func (p *Parser) peekPrecedence() int {
-	if p, ok := precedences[p.peekToken.Type]; ok {
-		return p
+	if r, ok := precedences[p.peekToken.Type]; ok {
+		return r
 	}
 
 	return LOWEST
@@ -138,8 +150,8 @@ func (p *Parser) peekPrecedence() int {
 
 // curPrecedence 向上获取运算符优先级
 func (p *Parser) curPrecedence() int {
-	if p, ok := precedences[p.curToken.Type]; ok {
-		return p
+	if r, ok := precedences[p.curToken.Type]; ok {
+		return r
 	}
 
 	return LOWEST
@@ -147,6 +159,8 @@ func (p *Parser) curPrecedence() int {
 
 // parseInfixExpression 解析中缀运算符
 func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
+	defer untrace(trace("parseInfixExpression"))
+
 	expression := &ast.InfixExpression{
 		Token:    p.curToken,
 		Operator: p.curToken.Literal,

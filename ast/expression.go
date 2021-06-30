@@ -2,6 +2,7 @@ package ast
 
 import (
 	"bytes"
+
 	"github.com/dollarkillerx/monkey/token"
 )
 
@@ -41,15 +42,14 @@ func (i *IntegerLiteral) String() string {
 	return i.Token.Literal
 }
 
+// PrefixExpression 前缀表达式
 type PrefixExpression struct {
 	Token    token.Token
 	Operator string
 	Right    Expression
 }
 
-func (p *PrefixExpression) expressionNode() {
-
-}
+func (p *PrefixExpression) expressionNode() {}
 
 func (p *PrefixExpression) TokenLiteral() string {
 	return p.Token.Literal
@@ -63,7 +63,7 @@ func (p *PrefixExpression) String() string {
 	out.WriteString(p.Right.String())
 	out.WriteString(")")
 
-	return p.Token.Literal
+	return out.String()
 }
 
 type InfixExpression struct {
