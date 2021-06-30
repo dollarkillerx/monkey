@@ -21,12 +21,12 @@ func tracePrint(fs string) {
 }
 
 func trace(msg string) string {
-	incIdent()
-	tracePrint("BEGIN " + msg)
+	//incIdent()
+	//tracePrint("BEGIN " + msg)
 	return msg
 }
 
-func untrace(msg string) {
-	tracePrint("END " + msg)
-	decIdent()
+func unTrace(msg string) {
+	//tracePrint("END " + msg)
+	//decIdent()
 }

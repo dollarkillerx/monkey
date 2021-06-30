@@ -2,9 +2,10 @@ package parser
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/dollarkillerx/monkey/ast"
 	"github.com/dollarkillerx/monkey/token"
-	"strconv"
 )
 
 // parseLetStatement let 解析
@@ -54,8 +55,9 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	return stmt
 }
 
+// parseExpressionStatement 解析表达式
 func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
-	defer untrace(trace("parseExpressionStatement"))
+	defer unTrace(trace("parseExpressionStatement"))
 
 	stmt := &ast.ExpressionStatement{
 		Token: p.curToken,
@@ -71,7 +73,7 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 
 // parseExpression 解析表达式
 func (p *Parser) parseExpression(precedence int) ast.Expression {
-	defer untrace(trace("parseExpression"))
+	defer unTrace(trace("parseExpression"))
 
 	prefix, ex := p.prefixParseFns[p.curToken.Type]
 	if !ex {
@@ -80,7 +82,6 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	}
 
 	leftExp := prefix()
-
 	for !p.peekTokenIs(token.SEMICOLON) && precedence < p.peekPrecedence() {
 		infix, ex := p.infixParseFns[p.peekToken.Type]
 		if !ex {
@@ -90,7 +91,6 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 		p.nextToken()
 
 		leftExp = infix(leftExp)
-
 	}
 
 	return leftExp
@@ -103,7 +103,7 @@ func (p *Parser) parseIdentifier() ast.Expression {
 
 // parseIntegerLiteral 解析int
 func (p *Parser) parseIntegerLiteral() ast.Expression {
-	defer untrace(trace("parseIntegerLiteral"))
+	defer unTrace(trace("parseIntegerLiteral"))
 
 	lit := &ast.IntegerLiteral{Token: p.curToken}
 
@@ -125,7 +125,7 @@ func (p *Parser) noPrefixParseFnError(t token.TokenType) {
 
 // parsePrefixExpression 前置解析
 func (p *Parser) parsePrefixExpression() ast.Expression {
-	defer untrace(trace("parsePrefixExpression"))
+	defer unTrace(trace("parsePrefixExpression"))
 
 	expression := &ast.PrefixExpression{
 		Token:    p.curToken,
@@ -159,7 +159,7 @@ func (p *Parser) curPrecedence() int {
 
 // parseInfixExpression 解析中缀运算符
 func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
-	defer untrace(trace("parseInfixExpression"))
+	defer unTrace(trace("parseInfixExpression"))
 
 	expression := &ast.InfixExpression{
 		Token:    p.curToken,
@@ -170,6 +170,25 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	precedences := p.curPrecedence()
 	p.nextToken()
 	expression.Right = p.parseExpression(precedences)
-
 	return expression
+}
+
+// parseBoolean 解析bool
+func (p *Parser) parseBoolean() ast.Expression {
+	return &ast.Boolean{
+		Token: p.curToken,
+		Value: p.curTokenIs(token.TRUE),
+	}
+}
+
+// parseGroupedExpression 解析括号
+func (p *Parser) parseGroupedExpression() ast.Expression {
+	p.nextToken()
+
+	exp := p.parseExpression(LOWEST)
+	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
+
+	return exp
 }

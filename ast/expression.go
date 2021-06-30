@@ -88,3 +88,17 @@ func (oe *InfixExpression) String() string {
 	out.WriteString(")")
 	return out.String()
 }
+
+type Boolean struct {
+	Token token.Token
+	Value bool
+}
+
+func (bl *Boolean) expressionNode() {}
+func (bl *Boolean) TokenLiteral() string {
+	return bl.Token.Literal
+}
+
+func (bl *Boolean) String() string {
+	return bl.Token.Literal
+}
